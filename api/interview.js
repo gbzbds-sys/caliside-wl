@@ -286,7 +286,41 @@ async function notifyUser(data,{kind,when,reason,logoUrl}){
     embed={title:'🎙️ Écrit validé — Passage à l’entretien vocal',description:`Bonne nouvelle **${data.pseudo}** : ta candidature écrite est **validée**.\n\n📅 **Créneau retenu :** ${when}\n\n➡️ Ce salon privé devient maintenant ton **ticket d’entretien vocal WL**.\n➡️ Présente-toi à l’heure indiquée et attends la prise en charge du staff.\n➡️ Après l’entretien, tu recevras ici la **décision finale** de ta WhiteList.`,color:11152639,footer:{text:'CaliSide WL • Étape 2 — Entretien vocal'},thumbnail:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
   }else if(kind==='approved'){
     content=did?`<@${did}> **ta WhiteList CaliSide est validée ! Bienvenue 🌴✅**`:`La WhiteList de **${data.pseudo}** est validée.`;
-    embed={title:'✅ Félicitations — WhiteList CaliSide validée !',description:`Félicitations **${data.pseudo}** ! 🎉\n\nTon entretien est terminé et ta candidature WhiteList est **définitivement validée**. Le rôle **CaliSide WL** t’a été attribué.\n\n━━━━━━━━━━━━━━━━━━\n\n🌴 **PROCHAINES ÉTAPES**\n\n**1️⃣ Accès serveur**\nRends-toi dans le salon : <#1480661322692690112>\nTu y trouveras les informations utiles pour rejoindre CaliSide.\n\n**2️⃣ Connexion directe FiveM**\n➡️ https://cfx.re/join/3m6z8r\n\n**3️⃣ Vérifie ton rôle Discord**\nTu dois maintenant avoir le rôle **CaliSide WL** sur le Discord.\n\n**4️⃣ Avant de rejoindre la ville**\nPrends connaissance des informations et règles disponibles sur le Discord afin d’être prêt pour ton arrivée.\n\n**5️⃣ Rejoins CaliSide**\nLance FiveM, utilise le lien CFX ci-dessus et profite de ton aventure RP. 🌴\n\n💜 **Bienvenue officiellement sur CaliSide US WL !**`,color:5763719,footer:{text:'CaliSide WL • WL TERMINÉE — VALIDÉE'},thumbnail:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
+    embed={title:'✅ Félicitations — WhiteList CaliSide validée !',description:`Félicitations **${data.pseudo}** ! 🎉
+
+Ton entretien est terminé et ta candidature WhiteList est **définitivement validée**. Le rôle **CaliSide WL** t’a été attribué.
+
+━━━━━━━━━━━━━━━━━━
+
+🌴 **AVANT DE REJOINDRE LE SERVEUR — SUIS CES ÉTAPES DANS L’ORDRE**
+
+**1️⃣ Lis le règlement CaliSide**
+📜 https://discord.com/channels/1429963172458139691/1429963172831432793
+➡️ Lis-le entièrement avant ta première connexion.
+
+**2️⃣ Consulte le guide du serveur**
+📘 https://discord.com/channels/1429963172458139691/1474068810268016852
+➡️ Il t’aidera à comprendre le fonctionnement de CaliSide et à bien commencer.
+
+**3️⃣ Regarde les touches et raccourcis**
+⌨️ https://discord.com/channels/1429963172458139691/1444660316737765376
+➡️ Garde ce salon sous la main pour connaître les commandes et raccourcis utiles en jeu.
+
+**4️⃣ Accède au salon de connexion serveur**
+🔐 <#1480661322692690112>
+➡️ Tu y trouveras les informations d’accès au serveur.
+
+**5️⃣ Rejoins CaliSide sur FiveM**
+🎮 Connexion directe : https://cfx.re/join/3m6z8r
+➡️ Lance FiveM puis utilise ce lien pour rejoindre directement le serveur.
+
+**6️⃣ Vérifie ton rôle Discord**
+✅ Tu dois maintenant avoir le rôle **CaliSide WL**.
+
+━━━━━━━━━━━━━━━━━━
+
+💜 **Bienvenue officiellement sur CaliSide US WL !**
+🌴 Lis bien les trois salons ci-dessus avant de rejoindre la ville afin d’être prêt pour ton arrivée.`,color:5763719,footer:{text:'CaliSide WL • WL TERMINÉE — VALIDÉE'},thumbnail:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
   }else{
     content=did?`<@${did}> ta candidature WhiteList CaliSide a reçu une décision. ❌`:`Décision WL pour **${data.pseudo}**.`;
     embed={title:'❌ WhiteList CaliSide refusée',description:`Ta candidature est **refusée**.\n\n**Motif :** ${trim(reason,1200)}`,color:15158332,footer:{text:'CaliSide WL • WL TERMINÉE — REFUSÉE'},thumbnail:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};

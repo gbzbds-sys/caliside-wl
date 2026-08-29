@@ -20,7 +20,7 @@
 - Logo CaliSide fourni intégré à `caliside-logo.png` et affiché dans l'embed de candidature privée.
 
 
-## V4.3
+## V4.4
 - Message initial privé clarifié : candidature écrite en attente de validation, puis passage vers entretien vocal si acceptée.
 - Ticket renommé wl-entretien-vocal après validation de l'écrit.
 - Message final WL validée enrichi avec le salon accès serveur <#1480661322692690112>, le lien CFX https://cfx.re/join/3m6z8r et les étapes de connexion.
