@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const API_VERSION='role-final-auto-v5-2026-08-25';
+const API_VERSION='v3.9-private-candidatures-2026-08-29';
 
 const trim=(v,n=1000)=>String(v??'').trim().slice(0,n);
 const sign=(payload,secret)=>crypto.createHmac('sha256',secret).update(payload).digest('base64url');
@@ -56,7 +56,14 @@ function formatSlot(v){
 
 const CANDIDATE_CHANNEL_ID=process.env.DISCORD_CANDIDATE_CHANNEL_ID || '1542681337587179651';
 const PENDING_CHANNEL_ID='1542681439701831720';
-const candidacyWebhook=()=>process.env.DISCORD_WEBHOOK_URL || '';
+const APPROVED_CHANNEL_ID='1543268691720798279';
+const REJECTED_CHANNEL_ID='1543268925184151593';
+const candidacyWebhook=()=>String(process.env.DISCORD_WEBHOOK_URL || '').trim();
+const webhookMessageUrl=(messageId)=>{
+  const wh=candidacyWebhook();
+  if(!wh) return '';
+  return `${wh.split('?')[0]}/messages/${messageId}`;
+};
 const notifyWebhook=()=>process.env.DISCORD_INTERVIEW_WEBHOOK_URL || process.env.DISCORD_WEBHOOK_URL || '';
 
 const WL_ROLE_ID=process.env.DISCORD_WL_ROLE_ID || '1543261181072904264';
@@ -157,23 +164,23 @@ async function channelApi(channelId,path='',options={}){
   });
 }
 
-async function sendPendingLog(payload){
+async function sendStatusLog(channelId,label,payload){
   const botToken=process.env.DISCORD_BOT_TOKEN;
-  if(botToken){
-    const r=await channelApi(PENDING_CHANNEL_ID,'',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(!r.ok){const t=await r.text();throw new Error('Impossible d’envoyer le log dans Candidature en attente : '+t.slice(0,120))}
-    return r;
-  }
-  const wh=notifyWebhook();
-  if(!wh) throw new Error('DISCORD_BOT_TOKEN ou DISCORD_INTERVIEW_WEBHOOK_URL manquant');
-  const r=await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(!r.ok){const t=await r.text();throw new Error('Impossible d’envoyer le log Discord : '+t.slice(0,120))}
+  if(!botToken) throw new Error(`DISCORD_BOT_TOKEN manquant : impossible d’envoyer la notification dans ${label}`);
+  const r=await channelApi(channelId,'',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!r.ok){const txt=await r.text();throw new Error(`Impossible d’envoyer la notification dans ${label} : `+txt.slice(0,160))}
   return r;
 }
 
 async function getCandidacy(messageId){
-  const botToken=process.env.DISCORD_BOT_TOKEN;
-  const r=botToken ? await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`) : await fetch(`${candidacyWebhook()}/messages/${messageId}`);
+  // Les candidatures sont créées par le webhook quand DISCORD_WEBHOOK_URL est présent.
+  // On relit donc d'abord via CE webhook afin de garder le même auteur/origine du message.
+  const whUrl=webhookMessageUrl(messageId);
+  if(whUrl){
+    const wr=await fetch(whUrl);
+    if(wr.ok) return wr.json();
+  }
+  const r=await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`);
   if(!r.ok) throw new Error('Impossible de récupérer la candidature Discord');
   return r.json();
 }
@@ -225,10 +232,43 @@ async function patchCandidacy(messageId,message,changes={}){
   };
   // Conserve les autres parties de la candidature si elle est répartie sur plusieurs embeds.
   const payload={content:message.content||'',allowed_mentions:{parse:[]},embeds:[embed,...((message?.embeds||[]).slice(1))]};
-  const botToken=process.env.DISCORD_BOT_TOKEN;
-  const r=botToken ? await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) : await fetch(`${candidacyWebhook()}/messages/${messageId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(!r.ok){const t=await r.text();throw new Error('Impossible de mettre à jour le statut de la candidature : '+t.slice(0,120))}
+  // IMPORTANT : un message créé par un webhook Discord ne peut PAS être modifié par le bot
+  // (erreur Discord 50005: Cannot edit a message authored by another user).
+  // Si le webhook principal est configuré, on modifie donc toujours le message avec ce même webhook.
+  const whUrl=webhookMessageUrl(messageId);
+  let r;
+  if(whUrl){
+    r=await fetch(whUrl,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }else{
+    r=await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }
+  if(!r.ok){const t=await r.text();throw new Error('Impossible de mettre à jour le statut de la candidature : '+t.slice(0,160))}
   return r.json();
+}
+
+
+function privateStatusChannel(data){
+  return /^\d{17,20}$/.test(String(data?.privateChannelId||'')) ? String(data.privateChannelId) : '';
+}
+
+async function sendPrivateCandidateUpdate(data, payload){
+  const channelId=privateStatusChannel(data);
+  if(!channelId) return {ok:false,skipped:true};
+  const did=String(data.discordId||'');
+  const r=await channelApi(channelId,'',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    ...payload,
+    allowed_mentions:{users:did?[did]:[]}
+  })});
+  if(!r.ok){const txt=await r.text();throw new Error('Impossible de notifier le candidat dans son salon privé : '+txt.slice(0,180))}
+  return {ok:true};
+}
+
+async function renamePrivateChannel(data,prefix){
+  const channelId=privateStatusChannel(data);
+  if(!channelId) return;
+  const suffix=String(data.discordId||'').slice(-4)||'wl';
+  const name=`${prefix}-${suffix}`.slice(0,90);
+  try{await discordApi(`/channels/${channelId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})})}catch{}
 }
 
 async function notifyUser(data,{kind,when,reason}){
@@ -236,16 +276,30 @@ async function notifyUser(data,{kind,when,reason}){
   let content='';
   let embed={};
   if(kind==='interview'){
-    content=did?`<@${did}> ton entretien WhiteList CaliSide est confirmé pour **${when}**. 🎙️🟣`:`Entretien WhiteList de **${data.pseudo}** confirmé pour **${when}**.`;
-    embed={title:'🎙️ Entretien WhiteList confirmé',description:`Le staff CaliSide a retenu le créneau de **${data.pseudo}**.\n\n**Date et heure :** ${when}\n**Statut :** en attente de l’entretien vocal puis de la décision WL définitive.`,color:11152639,footer:{text:'CaliSide WL • Entretien WL'},timestamp:new Date().toISOString()};
+    content=did?`<@${did}> ton écrit est **accepté** et ton entretien WhiteList est confirmé pour **${when}**. 🎙️🟣`:`Entretien WhiteList de **${data.pseudo}** confirmé pour **${when}**.`;
+    embed={title:'🎙️ Écrit validé — Entretien WhiteList confirmé',description:`Bonne nouvelle **${data.pseudo}** : ta candidature écrite est retenue.\n\n**Date et heure :** ${when}\n**Statut :** passage à l’entretien vocal, puis décision WL définitive.`,color:11152639,footer:{text:'CaliSide WL • Étape 2 — Entretien vocal'},timestamp:new Date().toISOString()};
   }else if(kind==='approved'){
     content=did?`<@${did}> **ta WhiteList CaliSide est validée !** ✅🟣`:`La WhiteList de **${data.pseudo}** est validée.`;
-    embed={title:'✅ WhiteList CaliSide validée',description:`Félicitations **${data.pseudo}** ! Ton entretien est terminé et ta candidature WhiteList est **définitivement validée**.\n\nBienvenue sur CaliSide WL. 💜`,color:5763719,footer:{text:'CaliSide WL • WL TERMINÉE — VALIDÉE'},timestamp:new Date().toISOString()};
+    embed={title:'✅ WhiteList CaliSide validée',description:`Félicitations **${data.pseudo}** ! Ton entretien est terminé et ta candidature WhiteList est **définitivement validée**.\n\nLe rôle CaliSide WL t’a été attribué. Bienvenue sur CaliSide. 💜`,color:5763719,footer:{text:'CaliSide WL • WL TERMINÉE — VALIDÉE'},timestamp:new Date().toISOString()};
   }else{
     content=did?`<@${did}> ta candidature WhiteList CaliSide a reçu une décision. ❌`:`Décision WL pour **${data.pseudo}**.`;
-    embed={title:'❌ WhiteList CaliSide refusée',description:`La candidature de **${data.pseudo}** est **refusée**.\n\n**Motif :** ${trim(reason,1200)}`,color:15158332,footer:{text:'CaliSide WL • WL TERMINÉE — REFUSÉE'},timestamp:new Date().toISOString()};
+    embed={title:'❌ WhiteList CaliSide refusée',description:`Ta candidature est **refusée**.\n\n**Motif :** ${trim(reason,1200)}`,color:15158332,footer:{text:'CaliSide WL • WL TERMINÉE — REFUSÉE'},timestamp:new Date().toISOString()};
   }
-  await sendPendingLog({content,allowed_mentions:{users:did?[did]:[]},embeds:[embed]});
+
+  // Le candidat est notifié UNIQUEMENT dans son propre salon privé.
+  if(privateStatusChannel(data)){
+    await sendPrivateCandidateUpdate(data,{content,embeds:[embed]});
+  }
+
+  // Les salons partagés deviennent des journaux STAFF : aucune mention joueur.
+  const targetChannelId = kind==='approved' ? APPROVED_CHANNEL_ID : (kind==='rejected' ? REJECTED_CHANNEL_ID : PENDING_CHANNEL_ID);
+  const targetLabel = kind==='approved' ? 'wl-validées' : (kind==='rejected' ? 'wl-refusées' : 'wl-entretien-vocal');
+  const staffContent = kind==='approved'
+    ? `✅ WL validée pour **${data.pseudo}** • dossier privé <#${data.privateChannelId||''}>`
+    : kind==='rejected'
+      ? `❌ WL refusée pour **${data.pseudo}** • dossier privé <#${data.privateChannelId||''}>`
+      : `🎙️ Écrit validé / entretien confirmé pour **${data.pseudo}** • dossier privé <#${data.privateChannelId||''}>`;
+  await sendStatusLog(targetChannelId,targetLabel,{content:staffContent,allowed_mentions:{parse:[]},embeds:[embed]});
 }
 
 export default async function handler(req,res){
@@ -264,7 +318,7 @@ export default async function handler(req,res){
     return res.status(200).json({
       ok:true,
       apiVersion:API_VERSION,
-      candidate:{pseudo:data.pseudo,discord:data.discord,discordId:data.discordId,slot1:data.slot1,slot2:data.slot2},
+      candidate:{pseudo:data.pseudo,discord:data.discord,discordId:data.discordId,privateChannelId:data.privateChannelId||'',slot1:data.slot1,slot2:data.slot2},
       state
     });
   }
@@ -302,6 +356,7 @@ export default async function handler(req,res){
         footer:'CaliSide WL • REFUS APRÈS ÉTUDE ÉCRITE'
       });
       await notifyUser(data,{kind:'rejected',reason});
+      await renamePrivateChannel(data,'wl-refusee');
       return res.status(200).json({ok:true,status:'rejected',stage:'written',reason});
     }
 
@@ -320,6 +375,7 @@ export default async function handler(req,res){
         footer:'CaliSide WL • EN ATTENTE DE DÉCISION WL'
       });
       await notifyUser(data,{kind:'interview',when});
+      await renamePrivateChannel(data,'wl-vocal');
       return res.status(200).json({ok:true,status:'interview_confirmed',when});
     }
 
@@ -365,6 +421,7 @@ export default async function handler(req,res){
         footer:'CaliSide WL • WL TERMINÉE — VALIDÉE'
       });
       await notifyUser(data,{kind:'approved'});
+      await renamePrivateChannel(data,'wl-validee');
       console.log('[WL FINAL APPROVAL ROLE VERIFIED]', JSON.stringify({userId:data.discordId,roleId:WL_ROLE_ID,roleResult}));
       return res.status(200).json({ok:true,status:'approved',role:roleResult});
     }
@@ -381,6 +438,7 @@ export default async function handler(req,res){
         footer:'CaliSide WL • WL TERMINÉE — REFUSÉE'
       });
       await notifyUser(data,{kind:'rejected',reason});
+      await renamePrivateChannel(data,'wl-refusee');
       return res.status(200).json({ok:true,status:'rejected',reason});
     }
 
