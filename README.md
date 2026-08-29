@@ -23,3 +23,7 @@ Ces IDs sont déjà définis comme valeurs par défaut dans le code.
 - `DISCORD_PENDING_CHANNEL_ID` : optionnel si tu gardes le salon par défaut.
 
 Le bot doit avoir accès aux deux salons et les permissions **Voir le salon**, **Envoyer des messages**, **Intégrer des liens**, **Lire l’historique des messages**. Pour attribuer la WL, il lui faut aussi **Gérer les rôles** et son rôle doit être placé au-dessus du rôle WL.
+
+
+## Endpoint final
+Le formulaire utilise uniquement `/api/caliside-submit-final`. Ne pas recréer `/api/send`.
