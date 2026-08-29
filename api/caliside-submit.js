@@ -262,19 +262,19 @@ export default async function handler(req, res) {
     try {
       privateChannel = await createPrivateCandidateChannel({ discordId: did, pseudo });
     } catch (e) {
-      return res.status(502).json({ ok:false, error:'Création du salon privé impossible', detail:String(e?.message || e), version:'4.2.0' });
+      return res.status(502).json({ ok:false, error:'Création du salon privé impossible', detail:String(e?.message || e), version:'4.5.0' });
     }
 
     const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
     const host = String(req.headers['x-forwarded-host'] || req.headers.host || 'caliside-wl-x9je.vercel.app').split(',')[0].trim();
-    const logoUrl = `${proto}://${host}/caliside-logo.png?v=4.3`;
+    const logoUrl = `${proto}://${host}/caliside-logo.png?v=4.5`;
 
     const mainEmbed = {
       title: '🟣 Nouvelle candidature WhiteList — CaliSide WL',
       color: 11152639,
-      thumbnail: { url: logoUrl },
+      image: { url: logoUrl },
       description: testMode
-        ? '🧪 **Candidature TEST** reçue par l’API V4.2.'
+        ? '🧪 **Candidature TEST** reçue par l’API V4.5.'
         : '📝 **Nouvelle candidature écrite** reçue.',
       fields: [
         { name: '📌 Statut WL', value: '🟡 **Candidature reçue — en attente d’étude écrite**', inline: false },
@@ -285,7 +285,7 @@ export default async function handler(req, res) {
         { name: '🎙️ Entretien', value: `**Créneau 1 :** ${formatSlot(b.interviewSlot1)}\n**Créneau 2 :** ${formatSlot(b.interviewSlot2)}\n**Note :** ${text(b.interviewNote || 'Aucune', 400)}`, inline: false },
         { name: '🔒 Salon privé candidat', value: `<#${privateChannel.id}>\nVisible uniquement par le candidat et le staff autorisé.`, inline: false }
       ],
-      footer: { text: 'CaliSide WL • Candidature reçue • API 4.2.0' },
+      footer: { text: 'CaliSide WL • Candidature reçue • API 4.5.0' },
       timestamp: new Date().toISOString()
     };
 

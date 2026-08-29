@@ -5,7 +5,7 @@ const API_VERSION='v4.3-private-flow-access-logo-2026-08-29';
 function logoUrlFromReq(req){
   const proto=String(req.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
   const host=String(req.headers?.['x-forwarded-host']||req.headers?.host||'caliside-wl-x9je.vercel.app').split(',')[0].trim();
-  return `${proto}://${host}/caliside-logo.png?v=4.3`;
+  return `${proto}://${host}/caliside-logo.png?v=4.5`;
 }
 
 const trim=(v,n=1000)=>String(v??'').trim().slice(0,n);
@@ -283,7 +283,7 @@ async function notifyUser(data,{kind,when,reason,logoUrl}){
   let embed={};
   if(kind==='interview'){
     content=did?`<@${did}> ton écrit est **accepté** : tu passes à l’étape de l’entretien vocal. 🎙️🟣`:`Entretien WhiteList de **${data.pseudo}** confirmé pour **${when}**.`;
-    embed={title:'🎙️ Écrit validé — Passage à l’entretien vocal',description:`Bonne nouvelle **${data.pseudo}** : ta candidature écrite est **validée**.\n\n📅 **Créneau retenu :** ${when}\n\n➡️ Ce salon privé devient maintenant ton **ticket d’entretien vocal WL**.\n➡️ Présente-toi à l’heure indiquée et attends la prise en charge du staff.\n➡️ Après l’entretien, tu recevras ici la **décision finale** de ta WhiteList.`,color:11152639,footer:{text:'CaliSide WL • Étape 2 — Entretien vocal'},thumbnail:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
+    embed={title:'🎙️ Écrit validé — Passage à l’entretien vocal',description:`Bonne nouvelle **${data.pseudo}** : ta candidature écrite est **validée**.\n\n📅 **Créneau retenu :** ${when}\n\n➡️ Ce salon privé devient maintenant ton **ticket d’entretien vocal WL**.\n➡️ Présente-toi à l’heure indiquée et attends la prise en charge du staff.\n➡️ Après l’entretien, tu recevras ici la **décision finale** de ta WhiteList.`,color:11152639,footer:{text:'CaliSide WL • Étape 2 — Entretien vocal'},image:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
   }else if(kind==='approved'){
     content=did?`<@${did}> **ta WhiteList CaliSide est validée ! Bienvenue 🌴✅**`:`La WhiteList de **${data.pseudo}** est validée.`;
     embed={title:'✅ Félicitations — WhiteList CaliSide validée !',description:`Félicitations **${data.pseudo}** ! 🎉
@@ -292,15 +292,15 @@ Ton entretien est terminé et ta candidature WhiteList est **définitivement val
 
 ━━━━━━━━━━━━━━━━━━
 
-🌴 **AVANT DE REJOINDRE LE SERVEUR — SUIS CES ÉTAPES DANS L’ORDRE**
+🌴 **AVANT DE REJOINDRE CALISIDE**
 
-**1️⃣ Lis le règlement CaliSide**
+**1️⃣ Lis le règlement**
 📜 https://discord.com/channels/1429963172458139691/1429963172831432793
 ➡️ Lis-le entièrement avant ta première connexion.
 
-**2️⃣ Consulte le guide du serveur**
+**2️⃣ Consulte le guide CaliSide**
 📘 https://discord.com/channels/1429963172458139691/1474068810268016852
-➡️ Il t’aidera à comprendre le fonctionnement de CaliSide et à bien commencer.
+➡️ Il t’aidera à comprendre le fonctionnement du serveur et à bien commencer.
 
 **3️⃣ Regarde les touches et raccourcis**
 ⌨️ https://discord.com/channels/1429963172458139691/1444660316737765376
@@ -311,7 +311,7 @@ Ton entretien est terminé et ta candidature WhiteList est **définitivement val
 ➡️ Tu y trouveras les informations d’accès au serveur.
 
 **5️⃣ Rejoins CaliSide sur FiveM**
-🎮 Connexion directe : https://cfx.re/join/3m6z8r
+🎮 https://cfx.re/join/3m6z8r
 ➡️ Lance FiveM puis utilise ce lien pour rejoindre directement le serveur.
 
 **6️⃣ Vérifie ton rôle Discord**
@@ -320,10 +320,10 @@ Ton entretien est terminé et ta candidature WhiteList est **définitivement val
 ━━━━━━━━━━━━━━━━━━
 
 💜 **Bienvenue officiellement sur CaliSide US WL !**
-🌴 Lis bien les trois salons ci-dessus avant de rejoindre la ville afin d’être prêt pour ton arrivée.`,color:5763719,footer:{text:'CaliSide WL • WL TERMINÉE — VALIDÉE'},thumbnail:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
+🌴 Lis bien les trois salons ci-dessus avant de rejoindre la ville afin d’être prêt pour ton arrivée.`,color:5763719,footer:{text:'CaliSide WL • WL TERMINÉE — VALIDÉE'},image:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
   }else{
     content=did?`<@${did}> ta candidature WhiteList CaliSide a reçu une décision. ❌`:`Décision WL pour **${data.pseudo}**.`;
-    embed={title:'❌ WhiteList CaliSide refusée',description:`Ta candidature est **refusée**.\n\n**Motif :** ${trim(reason,1200)}`,color:15158332,footer:{text:'CaliSide WL • WL TERMINÉE — REFUSÉE'},thumbnail:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
+    embed={title:'❌ WhiteList CaliSide refusée',description:`Ta candidature est **refusée**.\n\n**Motif :** ${trim(reason,1200)}`,color:15158332,footer:{text:'CaliSide WL • WL TERMINÉE — REFUSÉE'},image:logoUrl?{url:logoUrl}:undefined,timestamp:new Date().toISOString()};
   }
 
   // Le candidat est notifié UNIQUEMENT dans son propre salon privé.

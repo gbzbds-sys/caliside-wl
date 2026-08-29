@@ -25,3 +25,8 @@
 - Ticket renommé wl-entretien-vocal après validation de l'écrit.
 - Message final WL validée enrichi avec le salon accès serveur <#1480661322692690112>, le lien CFX https://cfx.re/join/3m6z8r et les étapes de connexion.
 - Logo CaliSide affiché aussi sur les notifications de suivi et de validation finale.
+
+
+## V4.5
+- Logo Discord affiché en bas des embeds (image large) au lieu du thumbnail à droite.
+- Message WL validée : règlement, guide, touches/raccourcis, accès serveur, lien CFX, vérification rôle dans cet ordre.
