@@ -29,3 +29,11 @@ V3.4: salon attente/entretien forcé sur 1542681439701831720. Musique de fond su
 - Corrige `Cannot edit a message authored by another user` (Discord code 50005).
 - Le bot reste utilisé pour l’attribution du rôle WL et l’envoi dans le salon d’attente.
 - Salon d’attente fixé à `1542681439701831720`.
+
+
+## V3.8 — Routage des salons WL
+- Candidatures WL : `1542681337587179651`
+- WL en attente / entretien : `1542681439701831720`
+- WL validées : `1543268691720798279`
+- WL refusées : `1543268925184151593`
+- Les notifications finales sont envoyées automatiquement dans le salon correspondant.

@@ -103,11 +103,11 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      return res.status(200).json({ ok: true, service: 'CaliSide submit', version: '3.7.0' });
+      return res.status(200).json({ ok: true, service: 'CaliSide submit', version: '3.8.0' });
     }
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'GET, POST');
-      return res.status(405).json({ ok: false, error: 'Méthode non autorisée', version: '3.7.0' });
+      return res.status(405).json({ ok: false, error: 'Méthode non autorisée', version: '3.8.0' });
     }
 
     let b = safeJsonBody(req);
@@ -152,7 +152,7 @@ export default async function handler(req, res) {
         { name: '🧭 RP recherché', value: arrayText(b.rpType || 'Non renseigné', 500), inline: false },
         { name: '🎙️ Entretien', value: `**Créneau 1 :** ${formatSlot(b.interviewSlot1)}\n**Créneau 2 :** ${formatSlot(b.interviewSlot2)}\n**Note :** ${text(b.interviewNote || 'Aucune', 400)}`, inline: false }
       ],
-      footer: { text: 'CaliSide WL • Candidature reçue • API 3.7.0' },
+      footer: { text: 'CaliSide WL • Candidature reçue • API 3.8.0' },
       timestamp: new Date().toISOString()
     };
 
@@ -174,7 +174,7 @@ export default async function handler(req, res) {
         detail: String(sent.raw || '').slice(0, 1200),
         discordStatus: sent.status,
         via: sent.via,
-        version: '3.7.0'
+        version: '3.8.0'
       });
     }
 
@@ -203,7 +203,7 @@ export default async function handler(req, res) {
               ...mainEmbed.fields,
               { name: '🔐 Gestion staff', value: `[**Ouvrir le panel staff**](${staffLink})\nÉtudier l’écrit, choisir le créneau, valider/refuser la WL.`, inline: false }
             ],
-            footer: { text: 'CaliSide WL • Candidature reçue • Panel staff actif • API 3.7.0' }
+            footer: { text: 'CaliSide WL • Candidature reçue • Panel staff actif • API 3.8.0' }
           };
           const patched = await discordPatch(messageId, { ...payload, embeds: [staffEmbed] }, sent.via);
           staffLinkPosted = patched.ok;
@@ -215,14 +215,14 @@ export default async function handler(req, res) {
       console.error('[CaliSide WL] génération/ajout lien staff:', e);
     }
 
-    return res.status(200).json({ ok: true, via: sent.via, staffLink, staffLinkPosted, staffLinkError, version: '3.7.0' });
+    return res.status(200).json({ ok: true, via: sent.via, staffLink, staffLinkPosted, staffLinkError, version: '3.8.0' });
   } catch (err) {
     console.error('[CaliSide WL] API 3.2 crash:', err);
     return res.status(500).json({
       ok: false,
       error: 'Erreur serveur CaliSide WL',
       detail: String(err?.stack || err?.message || err || 'Erreur inconnue').slice(0, 1500),
-      version: '3.7.0'
+      version: '3.8.0'
     });
   }
 }

@@ -56,6 +56,8 @@ function formatSlot(v){
 
 const CANDIDATE_CHANNEL_ID=process.env.DISCORD_CANDIDATE_CHANNEL_ID || '1542681337587179651';
 const PENDING_CHANNEL_ID='1542681439701831720';
+const APPROVED_CHANNEL_ID='1543268691720798279';
+const REJECTED_CHANNEL_ID='1543268925184151593';
 const candidacyWebhook=()=>String(process.env.DISCORD_WEBHOOK_URL || '').trim();
 const webhookMessageUrl=(messageId)=>{
   const wh=candidacyWebhook();
@@ -162,17 +164,11 @@ async function channelApi(channelId,path='',options={}){
   });
 }
 
-async function sendPendingLog(payload){
+async function sendStatusLog(channelId,label,payload){
   const botToken=process.env.DISCORD_BOT_TOKEN;
-  if(botToken){
-    const r=await channelApi(PENDING_CHANNEL_ID,'',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(!r.ok){const t=await r.text();throw new Error('Impossible d’envoyer le log dans Candidature en attente : '+t.slice(0,120))}
-    return r;
-  }
-  const wh=notifyWebhook();
-  if(!wh) throw new Error('DISCORD_BOT_TOKEN ou DISCORD_INTERVIEW_WEBHOOK_URL manquant');
-  const r=await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(!r.ok){const t=await r.text();throw new Error('Impossible d’envoyer le log Discord : '+t.slice(0,120))}
+  if(!botToken) throw new Error(`DISCORD_BOT_TOKEN manquant : impossible d’envoyer la notification dans ${label}`);
+  const r=await channelApi(channelId,'',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!r.ok){const txt=await r.text();throw new Error(`Impossible d’envoyer la notification dans ${label} : `+txt.slice(0,160))}
   return r;
 }
 
@@ -264,7 +260,9 @@ async function notifyUser(data,{kind,when,reason}){
     content=did?`<@${did}> ta candidature WhiteList CaliSide a reçu une décision. ❌`:`Décision WL pour **${data.pseudo}**.`;
     embed={title:'❌ WhiteList CaliSide refusée',description:`La candidature de **${data.pseudo}** est **refusée**.\n\n**Motif :** ${trim(reason,1200)}`,color:15158332,footer:{text:'CaliSide WL • WL TERMINÉE — REFUSÉE'},timestamp:new Date().toISOString()};
   }
-  await sendPendingLog({content,allowed_mentions:{users:did?[did]:[]},embeds:[embed]});
+  const targetChannelId = kind==='approved' ? APPROVED_CHANNEL_ID : (kind==='rejected' ? REJECTED_CHANNEL_ID : PENDING_CHANNEL_ID);
+  const targetLabel = kind==='approved' ? '🌴・wl-validées' : (kind==='rejected' ? '🌴・wl-refusées' : '🌴・wl-en-attente');
+  await sendStatusLog(targetChannelId,targetLabel,{content,allowed_mentions:{users:did?[did]:[]},embeds:[embed]});
 }
 
 export default async function handler(req,res){
