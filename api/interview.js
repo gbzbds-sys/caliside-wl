@@ -1,6 +1,12 @@
 import crypto from 'crypto';
 
-const API_VERSION='v4.1-private-candidate-staff-pings-2026-08-29';
+const API_VERSION='v4.2-private-candidate-logo-waiting-2026-08-29';
+
+function logoUrlFromReq(req){
+  const proto=String(req.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
+  const host=String(req.headers?.['x-forwarded-host']||req.headers?.host||'caliside-wl-x9je.vercel.app').split(',')[0].trim();
+  return `${proto}://${host}/caliside-logo.png?v=4.2`;
+}
 
 const trim=(v,n=1000)=>String(v??'').trim().slice(0,n);
 const sign=(payload,secret)=>crypto.createHmac('sha256',secret).update(payload).digest('base64url');

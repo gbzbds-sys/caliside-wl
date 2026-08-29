@@ -58,7 +58,7 @@ function privateChannelName(pseudo, discordId) {
     .toLowerCase().replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '').slice(0, 45) || 'candidat';
   const suffix = String(discordId || '').slice(-4) || Math.random().toString(36).slice(2, 6);
-  return `wl-ecrite-${base}-${suffix}`.slice(0, 90);
+  return `wl-ecrite-attente-${base}-${suffix}`.slice(0, 90);
 }
 
 async function createPrivateCandidateChannel({ discordId, pseudo }) {
@@ -139,7 +139,8 @@ async function postPrivateApplication(channelId, candidateId, embed, staffLink) 
       ...(embed.fields || []),
       ...(staffLink ? [{ name: '🛡️ Suivi staff', value: 'Le lien de gestion est réservé au staff. Les décisions seront publiées directement dans ce salon.', inline: false }] : [])
     ],
-    footer: { text: 'CaliSide WL • Salon privé candidat • API 4.1.0' },
+    footer: { text: 'CaliSide WL • Salon privé candidat • API 4.2.0' },
+    thumbnail: embed.thumbnail || undefined,
     timestamp: new Date().toISOString()
   };
   const sent = await botApi(`/channels/${channelId}/messages`, {
@@ -222,11 +223,11 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      return res.status(200).json({ ok: true, service: 'CaliSide submit', version: '4.1.0' });
+      return res.status(200).json({ ok: true, service: 'CaliSide submit', version: '4.2.0' });
     }
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'GET, POST');
-      return res.status(405).json({ ok: false, error: 'Méthode non autorisée', version: '4.1.0' });
+      return res.status(405).json({ ok: false, error: 'Méthode non autorisée', version: '4.2.0' });
     }
 
     let b = safeJsonBody(req);
@@ -261,14 +262,19 @@ export default async function handler(req, res) {
     try {
       privateChannel = await createPrivateCandidateChannel({ discordId: did, pseudo });
     } catch (e) {
-      return res.status(502).json({ ok:false, error:'Création du salon privé impossible', detail:String(e?.message || e), version:'4.0.0' });
+      return res.status(502).json({ ok:false, error:'Création du salon privé impossible', detail:String(e?.message || e), version:'4.2.0' });
     }
+
+    const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
+    const host = String(req.headers['x-forwarded-host'] || req.headers.host || 'caliside-wl-x9je.vercel.app').split(',')[0].trim();
+    const logoUrl = `${proto}://${host}/caliside-logo.png?v=4.2`;
 
     const mainEmbed = {
       title: '🟣 Nouvelle candidature WhiteList — CaliSide WL',
       color: 11152639,
+      thumbnail: { url: logoUrl },
       description: testMode
-        ? '🧪 **Candidature TEST** reçue par l’API V4.0.'
+        ? '🧪 **Candidature TEST** reçue par l’API V4.2.'
         : '📝 **Nouvelle candidature écrite** reçue.',
       fields: [
         { name: '📌 Statut WL', value: '🟡 **Candidature reçue — en attente d’étude écrite**', inline: false },
@@ -279,7 +285,7 @@ export default async function handler(req, res) {
         { name: '🎙️ Entretien', value: `**Créneau 1 :** ${formatSlot(b.interviewSlot1)}\n**Créneau 2 :** ${formatSlot(b.interviewSlot2)}\n**Note :** ${text(b.interviewNote || 'Aucune', 400)}`, inline: false },
         { name: '🔒 Salon privé candidat', value: `<#${privateChannel.id}>\nVisible uniquement par le candidat et le staff autorisé.`, inline: false }
       ],
-      footer: { text: 'CaliSide WL • Candidature reçue • API 4.1.0' },
+      footer: { text: 'CaliSide WL • Candidature reçue • API 4.2.0' },
       timestamp: new Date().toISOString()
     };
 
@@ -293,7 +299,7 @@ export default async function handler(req, res) {
         ok: false,
         error: 'Le salon privé a été créé mais la candidature n’a pas pu être publiée dedans',
         detail: String(e?.message || e),
-        version: '4.1.0'
+        version: '4.2.0'
       });
     }
 
@@ -318,7 +324,7 @@ export default async function handler(req, res) {
         privateChannelId: privateChannel.id,
         discordStatus: sent.status,
         via: sent.via,
-        version: '4.1.0'
+        version: '4.2.0'
       });
     }
 
@@ -359,14 +365,14 @@ export default async function handler(req, res) {
       console.error('[CaliSide WL] génération/ajout lien staff:', e);
     }
 
-    return res.status(200).json({ ok: true, via: sent.via, staffLink, staffLinkPosted, staffLinkError, privateChannelId: privateChannel.id, privatePosted: true, version: '4.1.0' });
+    return res.status(200).json({ ok: true, via: sent.via, staffLink, staffLinkPosted, staffLinkError, privateChannelId: privateChannel.id, privatePosted: true, version: '4.2.0' });
   } catch (err) {
     console.error('[CaliSide WL] API 4.0 crash:', err);
     return res.status(500).json({
       ok: false,
       error: 'Erreur serveur CaliSide WL',
       detail: String(err?.stack || err?.message || err || 'Erreur inconnue').slice(0, 1500),
-      version: '4.1.0'
+      version: '4.2.0'
     });
   }
 }

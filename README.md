@@ -13,3 +13,8 @@
 - Nouveau salon privé nommé `wl-ecrite-pseudo-xxxx`.
 - Ping automatique dans le salon privé : Gérant Modérateur, Responsable Staff, Gérant Légal, Gérant Illégal et Modérateur.
 - Les rôles restent autorisés à voir les candidatures privées.
+
+
+## V4.2
+- Salon initial: `wl-ecrite-attente-pseudo-xxxx`.
+- Logo CaliSide fourni intégré à `caliside-logo.png` et affiché dans l'embed de candidature privée.
