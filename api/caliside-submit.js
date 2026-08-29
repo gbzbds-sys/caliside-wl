@@ -132,14 +132,14 @@ async function postPrivateApplication(channelId, candidateId, embed, staffLink) 
     .split(',').map(v => v.trim()).filter(v => /^\d{17,20}$/.test(v));
   const staffRoles = [...new Set([...DEFAULT_STAFF_ROLE_IDS, ...envStaffRoles])];
   const privacyEmbed = {
-    title: '🔒 Ta candidature CaliSide WL',
-    description: 'Ce salon est **privé**. Seuls **toi et le staff CaliSide** peuvent voir son contenu. Les autres candidats ne voient pas ta candidature.\n\nLe staff publiera ici les étapes importantes : étude écrite, entretien vocal et décision finale.',
+    title: '🟡 Candidature écrite — En attente de validation',
+    description: '🔒 Ce salon est **privé** : seuls **toi et le staff CaliSide** peuvent voir son contenu. Les autres candidats ne voient pas ton dossier.\n\n📝 **Étape 1 — Étude écrite**\nTa candidature écrite a bien été reçue et elle est actuellement **en attente d’étude et de validation par le staff CaliSide**.\n\n✅ **Si ton écrit est accepté :**\n• tu passeras officiellement à la deuxième étape ;\n• ce même salon privé deviendra ton **ticket d’entretien vocal WL** ;\n• le staff choisira l’un des créneaux que tu as proposés ;\n• tu recevras ici la **date et l’heure** retenues pour ton entretien.\n\n❌ **Si ton écrit est refusé :**\n• tu seras informé directement dans ce salon ;\n• ton dossier sera clôturé et ne passera pas à l’entretien vocal.\n\n📋 **Parcours WL :** Écrit reçu → Étude staff → Entretien vocal → Décision finale → Rôle CaliSide WL.',
     color: 11152639,
     fields: [
       ...(embed.fields || []),
       ...(staffLink ? [{ name: '🛡️ Suivi staff', value: 'Le lien de gestion est réservé au staff. Les décisions seront publiées directement dans ce salon.', inline: false }] : [])
     ],
-    footer: { text: 'CaliSide WL • Salon privé candidat • API 4.2.0' },
+    footer: { text: 'CaliSide WL • Écrit en attente de validation • API 4.3.0' },
     thumbnail: embed.thumbnail || undefined,
     timestamp: new Date().toISOString()
   };
@@ -267,7 +267,7 @@ export default async function handler(req, res) {
 
     const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
     const host = String(req.headers['x-forwarded-host'] || req.headers.host || 'caliside-wl-x9je.vercel.app').split(',')[0].trim();
-    const logoUrl = `${proto}://${host}/caliside-logo.png?v=4.2`;
+    const logoUrl = `${proto}://${host}/caliside-logo.png?v=4.3`;
 
     const mainEmbed = {
       title: '🟣 Nouvelle candidature WhiteList — CaliSide WL',
