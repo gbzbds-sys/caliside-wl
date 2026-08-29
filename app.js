@@ -188,7 +188,7 @@ function fillTestApplication() {
 
   set('pseudo', '[TEST] CaliSide');
   set('age', '25');
-  set('discord', '123456789012345678');
+  set('discord', '1327939471072563272');
   set('fivem', 'TEST-FIVEM-ID');
   set('experience', 'Plus de 2 ans');
   set('previousRp', 'Candidature automatique de test. Expérience RP variée sur plusieurs serveurs, avec respect des règles, cohérence des scènes et jeu en équipe.');
@@ -232,47 +232,3 @@ if (new URLSearchParams(window.location.search).get('test') === '1') {
 
 
 // Musique d'ambiance CaliSide — ajout isolé, sans toucher au formulaire.
-const bgMusic = document.getElementById('bgMusic');
-const musicToggle = document.getElementById('musicToggle');
-let musicStarted = false;
-
-if (bgMusic && musicToggle) {
-  bgMusic.volume = 0.22;
-
-  const syncMusicButton = () => {
-    const playing = !bgMusic.paused;
-    musicToggle.textContent = playing ? '⏸ Pause musique' : '▶ Lire la musique';
-    musicToggle.setAttribute('aria-pressed', playing ? 'true' : 'false');
-  };
-
-  const startMusic = async () => {
-    if (musicStarted || !bgMusic.paused) return;
-    try {
-      await bgMusic.play();
-      musicStarted = true;
-      syncMusicButton();
-    } catch (_) {
-      // L'autoplay sonore peut être bloqué jusqu'à un clic explicite.
-    }
-  };
-
-  musicToggle.addEventListener('click', async (event) => {
-    event.stopPropagation();
-    if (bgMusic.paused) {
-      try {
-        await bgMusic.play();
-        musicStarted = true;
-      } catch (_) {}
-    } else {
-      bgMusic.pause();
-    }
-    syncMusicButton();
-  });
-
-  document.addEventListener('pointerdown', startMusic, { once: true });
-  bgMusic.addEventListener('play', syncMusicButton);
-  bgMusic.addEventListener('pause', syncMusicButton);
-  syncMusicButton();
-}
-
-console.info('[CaliSide WL] Frontend v3.0.0 — endpoint /api/caliside-submit');

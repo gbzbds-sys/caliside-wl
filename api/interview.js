@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const API_VERSION='role-final-auto-v5-2026-08-25';
+const API_VERSION='v3.6-webhook-edit-fix-2026-08-29';
 
 const trim=(v,n=1000)=>String(v??'').trim().slice(0,n);
 const sign=(payload,secret)=>crypto.createHmac('sha256',secret).update(payload).digest('base64url');
@@ -55,8 +55,13 @@ function formatSlot(v){
 }
 
 const CANDIDATE_CHANNEL_ID=process.env.DISCORD_CANDIDATE_CHANNEL_ID || '1542681337587179651';
-const PENDING_CHANNEL_ID=process.env.DISCORD_PENDING_CHANNEL_ID || '1542681439701831720';
-const candidacyWebhook=()=>process.env.DISCORD_WEBHOOK_URL || '';
+const PENDING_CHANNEL_ID='1542681439701831720';
+const candidacyWebhook=()=>String(process.env.DISCORD_WEBHOOK_URL || '').trim();
+const webhookMessageUrl=(messageId)=>{
+  const wh=candidacyWebhook();
+  if(!wh) return '';
+  return `${wh.split('?')[0]}/messages/${messageId}`;
+};
 const notifyWebhook=()=>process.env.DISCORD_INTERVIEW_WEBHOOK_URL || process.env.DISCORD_WEBHOOK_URL || '';
 
 const WL_ROLE_ID=process.env.DISCORD_WL_ROLE_ID || '1543261181072904264';
@@ -172,8 +177,14 @@ async function sendPendingLog(payload){
 }
 
 async function getCandidacy(messageId){
-  const botToken=process.env.DISCORD_BOT_TOKEN;
-  const r=botToken ? await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`) : await fetch(`${candidacyWebhook()}/messages/${messageId}`);
+  // Les candidatures sont créées par le webhook quand DISCORD_WEBHOOK_URL est présent.
+  // On relit donc d'abord via CE webhook afin de garder le même auteur/origine du message.
+  const whUrl=webhookMessageUrl(messageId);
+  if(whUrl){
+    const wr=await fetch(whUrl);
+    if(wr.ok) return wr.json();
+  }
+  const r=await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`);
   if(!r.ok) throw new Error('Impossible de récupérer la candidature Discord');
   return r.json();
 }
@@ -225,9 +236,17 @@ async function patchCandidacy(messageId,message,changes={}){
   };
   // Conserve les autres parties de la candidature si elle est répartie sur plusieurs embeds.
   const payload={content:message.content||'',allowed_mentions:{parse:[]},embeds:[embed,...((message?.embeds||[]).slice(1))]};
-  const botToken=process.env.DISCORD_BOT_TOKEN;
-  const r=botToken ? await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) : await fetch(`${candidacyWebhook()}/messages/${messageId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(!r.ok){const t=await r.text();throw new Error('Impossible de mettre à jour le statut de la candidature : '+t.slice(0,120))}
+  // IMPORTANT : un message créé par un webhook Discord ne peut PAS être modifié par le bot
+  // (erreur Discord 50005: Cannot edit a message authored by another user).
+  // Si le webhook principal est configuré, on modifie donc toujours le message avec ce même webhook.
+  const whUrl=webhookMessageUrl(messageId);
+  let r;
+  if(whUrl){
+    r=await fetch(whUrl,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }else{
+    r=await channelApi(CANDIDATE_CHANNEL_ID,`/${messageId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }
+  if(!r.ok){const t=await r.text();throw new Error('Impossible de mettre à jour le statut de la candidature : '+t.slice(0,160))}
   return r.json();
 }
 
