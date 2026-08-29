@@ -1,26 +1,15 @@
-# CaliSide WL V3.9 — Candidatures privées
+# CaliSide WL V4.0 — Candidature privée garantie
 
-## Nouveau fonctionnement
-- 1 candidature = 1 salon Discord privé créé automatiquement.
-- Le candidat ne voit que son propre dossier.
-- Le staff autorisé voit tous les salons privés.
-- Les salons partagés Candidatures / Vocal / Validées / Refusées deviennent des journaux staff.
-- Le candidat reçoit l’acceptation de l’écrit, le créneau vocal et la décision finale dans son salon privé.
-- Le rôle WL reste attribué automatiquement à la validation finale.
+- 1 candidature = 1 salon privé visible uniquement par le candidat + rôles staff autorisés.
+- La candidature est publiée dans le salon privé AVANT tout journal staff.
+- Si le salon privé ou son message ne peut pas être créé, l’envoi échoue clairement : aucun faux succès.
+- Les salons partagés sont uniquement des journaux staff et ne mentionnent jamais le joueur.
+- Toutes les notifications joueur (écrit accepté/refusé, entretien, décision finale) restent dans son salon privé.
+- Variables requises : DISCORD_BOT_TOKEN, DISCORD_WEBHOOK_URL, CALISIDE_STAFF_PASSWORD, DISCORD_STAFF_ROLE_IDS.
+- Le bot doit avoir Gérer les salons, Voir les salons, Envoyer des messages, Intégrer des liens, Lire l’historique et Gérer les rôles.
 
-## Variables Vercel nécessaires
-- `DISCORD_WEBHOOK_URL`
-- `DISCORD_BOT_TOKEN` (le bot doit avoir **Gérer les salons**, Voir les salons, Envoyer des messages, Gérer les rôles)
-- `CALISIDE_STAFF_PASSWORD`
 
-## Variables conseillées
-- `DISCORD_STAFF_ROLE_IDS` = IDs des rôles staff séparés par des virgules. Ces rôles auront accès aux salons privés.
-- `DISCORD_WL_PRIVATE_CATEGORY_ID` = catégorie où créer les salons privés. Si absent, le script utilise automatiquement la catégorie du salon `wl-candidatures-reçues`.
-
-## IDs CaliSide déjà configurés par défaut
-- Serveur : `1429963172458139691`
-- Rôle WL : `1543261181072904264`
-- Candidatures staff : `1542681337587179651`
-- Entretien vocal staff : `1542681439701831720`
-- WL validées : `1543268691720798279`
-- WL refusées : `1543268925184151593`
+## V4.1
+- Nouveau salon privé nommé `wl-ecrite-pseudo-xxxx`.
+- Ping automatique dans le salon privé : Gérant Modérateur, Responsable Staff, Gérant Légal, Gérant Illégal et Modérateur.
+- Les rôles restent autorisés à voir les candidatures privées.
