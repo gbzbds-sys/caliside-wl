@@ -1,3 +1,4 @@
+// CaliSide WL v3.1.0 - FIX 500 server diagnostics
 const form = document.getElementById('wlForm');
 const steps = [...document.querySelectorAll('.step')];
 const progressBar = document.getElementById('progressBar');
