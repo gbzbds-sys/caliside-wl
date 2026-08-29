@@ -474,25 +474,6 @@ footer{text-align:center;color:#756b81;font-size:11px;padding:22px 0 0}
 
 
 /* Musique CaliSide WL : contrôle isolé */
-.music-toggle{
-  position:fixed;
-  top:18px;
-  right:18px;
-  z-index:50;
-  min-height:44px;
-  padding:11px 16px;
-  border-radius:999px;
-  border:1px solid rgba(220,150,255,.22);
-  background:rgba(15,9,24,.86);
-  color:#f5eaff;
-  box-shadow:0 12px 34px rgba(75,24,120,.22),inset 0 1px 0 rgba(255,255,255,.04);
-  backdrop-filter:blur(14px);
-  font:800 12px Inter,sans-serif;
-  cursor:pointer;
-  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
-}
-.music-toggle:hover{transform:translateY(-2px);border-color:rgba(221,135,255,.45);box-shadow:0 16px 40px rgba(112,37,175,.28)}
-@media(max-width:760px){.music-toggle{top:10px;right:10px;padding:9px 12px;font-size:11px}}
 
 /* Accueil WL : compteurs simples */
 .mini-cards-counts{grid-template-columns:repeat(2,minmax(0,1fr));}
