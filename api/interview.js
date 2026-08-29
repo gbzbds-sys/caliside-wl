@@ -6,7 +6,7 @@ const trim=(v,n=1000)=>String(v??'').trim().slice(0,n);
 const sign=(payload,secret)=>crypto.createHmac('sha256',secret).update(payload).digest('base64url');
 
 function secrets(){
-  const password=process.env.CALISIDE_STAFF_PASSWORD || 'caliside1616';
+  const password=process.env.CALISIDE_STAFF_PASSWORD;
   if(!password) throw new Error('Configuration staff manquante');
   return {
     tokenSecret:crypto.createHash('sha256').update('caliside-wl-token:'+password).digest('hex'),
@@ -57,9 +57,10 @@ function formatSlot(v){
 const CANDIDATE_CHANNEL_ID=process.env.DISCORD_CANDIDATE_CHANNEL_ID || '1542681337587179651';
 const PENDING_CHANNEL_ID=process.env.DISCORD_PENDING_CHANNEL_ID || '1542681439701831720';
 const candidacyWebhook=()=>process.env.DISCORD_WEBHOOK_URL || '';
-const notifyWebhook=()=>process.env.DISCORD_INTERVIEW_WEBHOOK_URL || '';
+const notifyWebhook=()=>process.env.DISCORD_INTERVIEW_WEBHOOK_URL || process.env.DISCORD_WEBHOOK_URL || '';
 
-const WL_ROLE_ID=process.env.DISCORD_WL_ROLE_ID || '1541786744314134549';
+const WL_ROLE_ID=process.env.DISCORD_WL_ROLE_ID || '1543261181072904264';
+const DEFAULT_GUILD_ID='1429963172458139691';
 
 async function discordApi(path, options={}){
   const botToken=process.env.DISCORD_BOT_TOKEN;
@@ -75,7 +76,7 @@ async function discordApi(path, options={}){
 
 async function assignWhitelistRole(discordUserId){
   const botToken=process.env.DISCORD_BOT_TOKEN;
-  const guildId=process.env.DISCORD_GUILD_ID;
+  const guildId=process.env.DISCORD_GUILD_ID || DEFAULT_GUILD_ID;
   if(!discordUserId) throw new Error('ID Discord du joueur manquant : impossible d’attribuer le rôle WL');
   if(!/^\d{17,20}$/.test(String(discordUserId))) throw new Error('ID Discord joueur invalide : '+String(discordUserId));
   if(!botToken || !guildId) throw new Error('Attribution automatique du rôle WL non configurée : vérifie DISCORD_BOT_TOKEN et DISCORD_GUILD_ID dans Vercel');
@@ -332,7 +333,7 @@ export default async function handler(req,res){
       // Double vérification juste avant de clôturer la WL. Si Discord n'a pas
       // réellement le rôle sur le membre, on retente une fois puis on bloque
       // la validation au lieu d'afficher un faux succès.
-      const guildId=process.env.DISCORD_GUILD_ID;
+      const guildId=process.env.DISCORD_GUILD_ID || DEFAULT_GUILD_ID;
       const checkMember=async()=>discordApi(`/guilds/${guildId}/members/${data.discordId}`);
       let memberCheck=await checkMember();
       let hasRole=memberCheck.ok && (memberCheck.body?.roles||[]).map(String).includes(String(WL_ROLE_ID));

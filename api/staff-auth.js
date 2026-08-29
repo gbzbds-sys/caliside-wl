@@ -29,7 +29,7 @@ function sessionValid(raw,secret){
 }
 
 export default async function handler(req,res){
-  const password=process.env.CALISIDE_STAFF_PASSWORD || 'caliside1616';
+  const password=process.env.CALISIDE_STAFF_PASSWORD;
   if(!password) return res.status(503).json({error:'Définis CALISIDE_STAFF_PASSWORD dans Vercel'});
   const secret=cookieSecret(password);
 

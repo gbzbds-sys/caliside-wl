@@ -1,11 +1,21 @@
-# CaliSide WL V3
+# CaliSide WL V3.3 — Staff workflow
 
-Structure Vercel :
+Cette version conserve le formulaire V3 et ajoute le lien **Ouvrir le panel staff** directement sur la candidature Discord.
 
-- `api/caliside-submit.js` : endpoint principal de candidature
-- `api/send.js` : compatibilité avec les anciennes versions/caches du frontend
-- `api/interview.js` : workflow entretien
-- `api/staff-auth.js` : authentification staff
-- `api/health.js` : test de disponibilité API
+Variables Vercel nécessaires au minimum :
+- `DISCORD_WEBHOOK_URL`
+- `CALISIDE_STAFF_PASSWORD`
 
-Le frontend actuel utilise `/api/caliside-submit` et charge `app.js?v=3.0.0` pour forcer la mise à jour navigateur.
+Pour l’attribution automatique du rôle WL à la validation finale :
+- `DISCORD_BOT_TOKEN`
+- `DISCORD_GUILD_ID`
+- `DISCORD_WL_ROLE_ID`
+- `DISCORD_CANDIDATE_CHANNEL_ID` (si le bot doit lire/modifier le salon au lieu du webhook)
+
+`DISCORD_INTERVIEW_WEBHOOK_URL` est facultatif : à défaut, le webhook principal est utilisé pour les notifications.
+
+
+## CaliSide Discord préconfiguré
+- Guild ID par défaut: 1429963172458139691
+- WL Role ID par défaut: 1543261181072904264
+Ces valeurs peuvent toujours être remplacées via DISCORD_GUILD_ID et DISCORD_WL_ROLE_ID dans Vercel.

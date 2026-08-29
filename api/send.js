@@ -1,1 +1,1 @@
-export { default } from './caliside-submit.js';
+module.exports = require('./caliside-submit.js');

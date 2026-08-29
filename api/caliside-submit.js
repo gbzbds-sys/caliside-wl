@@ -76,16 +76,38 @@ async function discordPost(payload) {
   return { ok: true, status: r.status, via: 'bot', data };
 }
 
+
+async function discordPatch(messageId, payload, via) {
+  const webhook = String(process.env.DISCORD_WEBHOOK_URL || '').trim();
+  const botToken = String(process.env.DISCORD_BOT_TOKEN || '').trim();
+  const channelId = String(process.env.DISCORD_CANDIDATE_CHANNEL_ID || '').trim();
+
+  let url = '';
+  const headers = { 'Content-Type': 'application/json' };
+  if (via === 'webhook' && webhook) {
+    url = `${webhook}/messages/${messageId}`;
+  } else if (botToken && channelId) {
+    url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`;
+    headers.Authorization = `Bot ${botToken}`;
+  } else {
+    return { ok: false, status: 0, raw: 'Impossible de modifier le message Discord : configuration absente.' };
+  }
+
+  const r = await fetch(url, { method: 'PATCH', headers, body: JSON.stringify(payload) });
+  const raw = await r.text();
+  return { ok: r.ok, status: r.status, raw };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
   try {
     if (req.method === 'GET') {
-      return res.status(200).json({ ok: true, service: 'CaliSide submit', version: '3.2.0' });
+      return res.status(200).json({ ok: true, service: 'CaliSide submit', version: '3.3.0' });
     }
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'GET, POST');
-      return res.status(405).json({ ok: false, error: 'Méthode non autorisée', version: '3.2.0' });
+      return res.status(405).json({ ok: false, error: 'Méthode non autorisée', version: '3.3.0' });
     }
 
     let b = safeJsonBody(req);
@@ -120,16 +142,17 @@ export default async function handler(req, res) {
       title: '🟣 Nouvelle candidature WhiteList — CaliSide WL',
       color: 11152639,
       description: testMode
-        ? '🧪 **Candidature TEST** reçue par l’API V3.2.'
+        ? '🧪 **Candidature TEST** reçue par l’API V3.3.'
         : '📝 **Nouvelle candidature écrite** reçue.',
       fields: [
+        { name: '📌 Statut WL', value: '🟡 **Candidature reçue — en attente d’étude écrite**', inline: false },
         { name: '👤 Candidat', value: `**Pseudo :** ${pseudo}\n**Âge :** ${text(b.age || 'Non renseigné', 30)}\n**Discord :** ${text(b.discord || 'Non renseigné', 80)}${did ? `\n**Mention :** <@${did}>` : ''}\n**FiveM :** ${text(b.fivem || 'Non renseigné', 100)}`, inline: false },
         { name: '🎮 Expérience', value: `**Temps RP :** ${text(b.experience || 'Non renseigné', 150)}\n${text(b.previousRp || 'Non renseigné', 700)}`, inline: false },
         { name: '🎭 Projet RP', value: text(b.character || 'Non renseigné', 900), inline: false },
         { name: '🧭 RP recherché', value: arrayText(b.rpType || 'Non renseigné', 500), inline: false },
         { name: '🎙️ Entretien', value: `**Créneau 1 :** ${formatSlot(b.interviewSlot1)}\n**Créneau 2 :** ${formatSlot(b.interviewSlot2)}\n**Note :** ${text(b.interviewNote || 'Aucune', 400)}`, inline: false }
       ],
-      footer: { text: 'CaliSide WL • Candidature reçue • API 3.2.0' },
+      footer: { text: 'CaliSide WL • Candidature reçue • API 3.3.0' },
       timestamp: new Date().toISOString()
     };
 
@@ -151,35 +174,55 @@ export default async function handler(req, res) {
         detail: String(sent.raw || '').slice(0, 1200),
         discordStatus: sent.status,
         via: sent.via,
-        version: '3.2.0'
+        version: '3.3.0'
       });
     }
 
-    // Le lien staff est signé si un mot de passe est configuré. Ce bloc ne peut pas casser l’envoi principal.
+    // Génère le lien staff signé et l'ajoute DIRECTEMENT sur la candidature Discord.
     let staffLink = null;
+    let staffLinkPosted = false;
+    let staffLinkError = null;
     try {
       const messageId = sent.data?.id || '';
       const staffPassword = String(process.env.CALISIDE_STAFF_PASSWORD || '').trim();
-      if (messageId && staffPassword) {
+      if (!staffPassword) {
+        staffLinkError = 'CALISIDE_STAFF_PASSWORD manquant dans Vercel';
+      } else if (!messageId) {
+        staffLinkError = 'Discord n’a pas renvoyé de messageId';
+      } else {
         const body = Buffer.from(JSON.stringify({ pseudo, discord: text(b.discord, 80), discordId: did, messageId, slot1: b.interviewSlot1, slot2: b.interviewSlot2, createdAt: Date.now() })).toString('base64url');
         const secret = createHash('sha256').update(`caliside-wl-token:${staffPassword}`).digest('hex');
         const sig = createHmac('sha256', secret).update(body).digest('base64url');
         const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
         const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0];
-        if (host) staffLink = `${proto}://${host}/staff.html?token=${encodeURIComponent(`${body}.${sig}`)}`;
+        if (host) {
+          staffLink = `${proto}://${host}/staff.html?token=${encodeURIComponent(`${body}.${sig}`)}`;
+          const staffEmbed = {
+            ...mainEmbed,
+            fields: [
+              ...mainEmbed.fields,
+              { name: '🔐 Gestion staff', value: `[**Ouvrir le panel staff**](${staffLink})\nÉtudier l’écrit, choisir le créneau, valider/refuser la WL.`, inline: false }
+            ],
+            footer: { text: 'CaliSide WL • Candidature reçue • Panel staff actif • API 3.3.0' }
+          };
+          const patched = await discordPatch(messageId, { ...payload, embeds: [staffEmbed] }, sent.via);
+          staffLinkPosted = patched.ok;
+          if (!patched.ok) staffLinkError = `Discord PATCH ${patched.status}: ${String(patched.raw || '').slice(0,300)}`;
+        }
       }
     } catch (e) {
-      console.error('[CaliSide WL] génération lien staff:', e);
+      staffLinkError = String(e?.message || e);
+      console.error('[CaliSide WL] génération/ajout lien staff:', e);
     }
 
-    return res.status(200).json({ ok: true, via: sent.via, staffLink, version: '3.2.0' });
+    return res.status(200).json({ ok: true, via: sent.via, staffLink, staffLinkPosted, staffLinkError, version: '3.3.0' });
   } catch (err) {
     console.error('[CaliSide WL] API 3.2 crash:', err);
     return res.status(500).json({
       ok: false,
       error: 'Erreur serveur CaliSide WL',
       detail: String(err?.stack || err?.message || err || 'Erreur inconnue').slice(0, 1500),
-      version: '3.2.0'
+      version: '3.3.0'
     });
   }
 }
