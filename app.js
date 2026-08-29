@@ -273,3 +273,5 @@ if (bgMusic && musicToggle) {
   bgMusic.addEventListener('pause', syncMusicButton);
   syncMusicButton();
 }
+
+console.info('[CaliSide WL] Frontend v3.0.0 — endpoint /api/caliside-submit');

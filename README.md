@@ -1,33 +1,11 @@
-# CaliSide WL — version propre finale
+# CaliSide WL V3
 
-Structure attendue sur GitHub :
+Structure Vercel :
 
-```
-api/
-  caliside-submit.js
-  health.js
-  interview.js
-  staff-auth.js
-assets/
-CaliSide.mp3
-app.js
-caliside-logo.png
-glass-crack-overlay.png
-index.html
-staff.html
-styles.css
-vercel.json
-```
+- `api/caliside-submit.js` : endpoint principal de candidature
+- `api/send.js` : compatibilité avec les anciennes versions/caches du frontend
+- `api/interview.js` : workflow entretien
+- `api/staff-auth.js` : authentification staff
+- `api/health.js` : test de disponibilité API
 
-## Variables Vercel
-- `DISCORD_WEBHOOK_URL` : recommandé pour recevoir les candidatures.
-- `DISCORD_BOT_TOKEN` : utile pour les actions bot/DM/rôles.
-- `DISCORD_CANDIDATE_CHANNEL_ID` : seulement utilisé si le webhook n'est pas disponible.
-- `CALISIDE_STAFF_PASSWORD` : mot de passe du panel staff.
-- autres variables Discord déjà utilisées par le projet pour le rôle WL/guild.
-
-## Tests
-- API : `/api/health`
-- Formulaire prérempli : `/?test=1`
-
-Cette version utilise `/api/caliside-submit` et privilégie le webhook pour éviter `Missing Access (50001)` lors de la création d'une candidature.
+Le frontend actuel utilise `/api/caliside-submit` et charge `app.js?v=3.0.0` pour forcer la mise à jour navigateur.
