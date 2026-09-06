@@ -31,12 +31,12 @@
       <div class="hero-copy">
         <div class="eyebrow"><span class="dot"></span> CANDIDATURE OFFICIELLE</div>
         <h1>WhiteList <span>CaliSide WL</span></h1>
-        <p>Un formulaire propre, sérieux et cohérent pour repérer les joueurs motivés. Présente ton expérience, ton projet RP, tes disponibilités et ta vision du roleplay.</p>
+        <p>Un formulaire propre, sérieux et cohérent pour repérer les joueurs motivés. Une candidature rapide : quelques informations, ton projet RP, 2 questions RP et 1 mise en situation.</p>
 
         <div class="badges">
-          <span>⏱ 10–15 min</span>
+          <span>⏱ 3–5 min</span>
           <span>🎭 Serious RP</span>
-          <span>🟣 6 étapes</span>
+          <span>🟣 4 étapes</span>
           <span>📨 Envoi Discord</span>
         </div>
 
@@ -47,12 +47,12 @@
 
         <div class="mini-cards mini-cards-counts">
           <article class="mini-card">
-            <strong>📚 5 questions RP</strong>
-            <p>Les bases essentielles du roleplay.</p>
+            <strong>📚 2 questions RP</strong>
+            <p>Deux termes RP essentiels, avec tes propres mots.</p>
           </article>
           <article class="mini-card">
-            <strong>🎬 4 mises en situation</strong>
-            <p>Pour voir ta logique et ta manière de jouer.</p>
+            <strong>🎬 1 mise en situation</strong>
+            <p>Une seule situation pour voir ta logique RP.</p>
           </article>
         </div>
       </div>
@@ -60,9 +60,9 @@
 
 
     <section class="wl-flow glass-panel">
-      <div class="flow-step"><span>1</span><strong>Candidature écrite</strong><small>Réponses + créneaux</small></div>
+      <div class="flow-step"><span>1</span><strong>Candidature écrite</strong><small>Formulaire court</small></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step"><span>2</span><strong>Entretien vocal</strong><small>Créneau validé par le staff</small></div>
+      <div class="flow-step"><span>2</span><strong>Entretien vocal</strong><small>Organisation avec le staff</small></div>
       <div class="flow-arrow">→</div>
       <div class="flow-step"><span>3</span><strong>Décision WL</strong><small>Validée ou refusée avec motif</small></div>
     </section>
@@ -73,7 +73,7 @@
           <span class="step-kicker">Progression</span>
           <strong id="stepTitle">Informations</strong>
         </div>
-        <div class="step-count"><span id="currentStep">1</span>/6</div>
+        <div class="step-count"><span id="currentStep">1</span>/4</div>
       </div>
       <div class="progress"><div id="progressBar"></div></div>
 
@@ -81,17 +81,19 @@
         <section class="step active" data-step="1">
           <div class="section-head">
             <span>01</span>
-            <div><h2>Informations générales</h2><p>On commence par les bases.</p></div>
+            <div><h2>Informations essentielles</h2><p>Seulement ce dont le staff a besoin pour retrouver ta candidature.</p></div>
           </div>
+
           <div class="grid two">
-            <label class="field"><span>Prénom / pseudo <b>*</b></span><input name="pseudo" required maxlength="40" placeholder="Ton prénom / pseudo" /></label>
-            <label class="field"><span>Âge <b>*</b></span><input name="age" type="number" min="15" max="99" required placeholder="Ex. 24" /></label>
-            <label class="field"><span>ID Discord numérique <b>*</b></span><input name="discord" required inputmode="numeric" pattern="\d{15,22}" maxlength="22" placeholder="Ex. 123456789012345678" title="Copie ton identifiant Discord numérique" /></label>
-            <label class="field"><span>Steam / FiveM ID</span><input name="fivem" maxlength="100" placeholder="Facultatif" /></label>
+            <label class="field"><span>Prénom / pseudo</span><input name="pseudo" maxlength="60" placeholder="Ton prénom ou pseudo" /></label>
+            <label class="field"><span>Âge</span><input name="age" type="number" placeholder="Ex. 24" /></label>
+            <label class="field"><span>ID Discord numérique <b>*</b></span><input name="discord" required inputmode="numeric" maxlength="24" placeholder="Ex. 123456789012345678" /></label>
+            <label class="field"><span>Steam / FiveM ID</span><input name="fivem" maxlength="120" placeholder="Facultatif" /></label>
           </div>
-          <label class="field"><span>Depuis combien de temps fais-tu du RP ? <b>*</b></span>
-            <select name="experience" required>
-              <option value="">Sélectionner</option>
+
+          <label class="field"><span>Ton expérience RP</span>
+            <select name="experience">
+              <option value="">Facultatif</option>
               <option>Je débute</option>
               <option>Moins de 6 mois</option>
               <option>6 mois à 1 an</option>
@@ -99,82 +101,53 @@
               <option>Plus de 2 ans</option>
             </select>
           </label>
-          <label class="field"><span>Parle-nous rapidement de tes expériences RP précédentes <b>*</b></span><textarea name="previousRp" required minlength="40" maxlength="900" placeholder="Serveurs, rôles joués, ce que tu as appris..."></textarea><small><i data-counter="previousRp">0</i>/900</small></label>
         </section>
 
         <section class="step" data-step="2">
-          <div class="section-head"><span>02</span><div><h2>Ton projet RP</h2><p>Montre-nous ce que tu veux construire en ville.</p></div></div>
-          <label class="field"><span>Quel type de personnage souhaites-tu jouer ? <b>*</b></span><textarea name="character" required minlength="80" maxlength="1200" placeholder="Nom, personnalité, histoire courte, ambitions..."></textarea><small><i data-counter="character">0</i>/1200</small></label>
-          <fieldset class="field"><legend>Quel type de RP t'intéresse ? <b>*</b></legend><div class="choice-grid" id="rpChoices">
+          <div class="section-head"><span>02</span><div><h2>Ton projet RP</h2><p>Quelques lignes suffisent. Aucun nombre minimum de caractères.</p></div></div>
+
+          <label class="field"><span>Quel personnage / projet aimerais-tu jouer ?</span><textarea name="character" maxlength="1200" placeholder="Explique simplement ton idée de personnage et ce que tu aimerais faire en ville."></textarea></label>
+
+          <fieldset class="field"><legend>Quel type de RP t'intéresse ?</legend><div class="choice-grid" id="rpChoices">
             <label><input type="checkbox" name="rpType" value="Civil"><span>🏙️ Civil</span></label>
             <label><input type="checkbox" name="rpType" value="Entreprise"><span>💼 Entreprise</span></label>
             <label><input type="checkbox" name="rpType" value="Service public"><span>🏛️ Service public</span></label>
-            <label><input type="checkbox" name="rpType" value="Police / Gendarmerie"><span>🚓 Police / Gendarmerie</span></label>
+            <label><input type="checkbox" name="rpType" value="Police"><span>🚓 Police</span></label>
             <label><input type="checkbox" name="rpType" value="EMS"><span>🚑 EMS</span></label>
             <label><input type="checkbox" name="rpType" value="Mécano"><span>🔧 Mécano</span></label>
             <label><input type="checkbox" name="rpType" value="Illégal"><span>🕶️ Illégal</span></label>
             <label><input type="checkbox" name="rpType" value="Gang / Organisation"><span>🔫 Gang / Organisation</span></label>
           </div></fieldset>
-          <label class="field"><span>Quels sont tes objectifs à moyen / long terme ? <b>*</b></span><textarea name="goals" required minlength="60" maxlength="1000" placeholder="Évolution de ton personnage, projets, interactions recherchées..."></textarea><small><i data-counter="goals">0</i>/1000</small></label>
-          <label class="field"><span>Pourquoi CaliSide plutôt qu'un autre serveur ? <b>*</b></span><textarea name="whyCaliSide" required minlength="70" maxlength="1000" placeholder="Ta motivation réelle pour rejoindre CaliSide."></textarea></label>
-          <label class="field"><span>Qu'est-ce que tu peux apporter à CaliSide ? <b>*</b></span><textarea name="contribution" required minlength="60" maxlength="1000" placeholder="Qualité de scènes, régularité, créativité, projets, bonne ambiance..."></textarea><small><i data-counter="contribution">0</i>/1000</small></label>
+
+          <label class="field"><span>Pourquoi souhaites-tu rejoindre CaliSide ?</span><textarea name="whyCaliSide" maxlength="1000" placeholder="Une réponse courte suffit."></textarea></label>
         </section>
 
         <section class="step" data-step="3">
-          <div class="section-head"><span>03</span><div><h2>Disponibilités</h2><p>Pour savoir quand on pourra te croiser en ville.</p></div></div>
-          <label class="field"><span>Temps de jeu moyen par semaine <b>*</b></span>
-            <select name="weeklyTime" required>
-              <option value="">Sélectionner</option>
-              <option>Moins de 5 h</option>
-              <option>5 à 10 h</option>
-              <option>10 à 20 h</option>
-              <option>20 à 30 h</option>
-              <option>Plus de 30 h</option>
-            </select>
-          </label>
-          <fieldset class="field"><legend>Quand es-tu généralement disponible ? <b>*</b></legend><div class="choice-grid compact" id="availabilityChoices">
-            <label><input type="checkbox" name="availability" value="Matin"><span>🌅 Matin</span></label>
-            <label><input type="checkbox" name="availability" value="Après-midi"><span>☀️ Après-midi</span></label>
-            <label><input type="checkbox" name="availability" value="Soir"><span>🌆 Soir</span></label>
-            <label><input type="checkbox" name="availability" value="Nuit"><span>🌙 Nuit</span></label>
-            <label><input type="checkbox" name="availability" value="Week-end"><span>📅 Week-end</span></label>
-          </div></fieldset>
-          <label class="field"><span>As-tu des contraintes ou des périodes où tu seras moins présent ?</span><textarea name="constraints" maxlength="650" placeholder="Facultatif"></textarea><small><i data-counter="constraints">0</i>/650</small></label>
+          <div class="section-head"><span>03</span><div><h2>RP & mise en situation</h2><p>2 questions RP + 1 seule mise en situation.</p></div></div>
+
+          <label class="field"><span>1. Avec tes mots, qu'est-ce que le Fear RP ?</span><textarea name="fear" maxlength="700" placeholder="Réponse courte acceptée."></textarea></label>
+
+          <label class="field"><span>2. Avec tes mots, qu'est-ce que le Metagaming ?</span><textarea name="meta" maxlength="700" placeholder="Réponse courte acceptée."></textarea></label>
+
+          <label class="field"><span>3. Mise en situation : tu es seul et deux personnes armées te braquent. Que fais-tu ?</span><textarea name="armedRobbery" maxlength="1000" placeholder="Explique simplement ta réaction RP."></textarea></label>
         </section>
 
         <section class="step" data-step="4">
-          <div class="section-head"><span>04</span><div><h2>Connaissances RP</h2><p>Réponds avec tes propres mots.</p></div></div>
-          <label class="field"><span>Qu'est-ce que le Freekill ? <b>*</b></span><textarea name="freekill" required minlength="35" maxlength="650" placeholder="Explique le terme et donne un exemple si besoin."></textarea></label>
-          <label class="field"><span>Qu'est-ce que le No Pain RP ? <b>*</b></span><textarea name="nopain" required minlength="35" maxlength="650" placeholder="Explique comment un joueur doit prendre en compte blessures et douleurs."></textarea></label>
-          <label class="field"><span>Qu'est-ce que le Fear RP ? <b>*</b></span><textarea name="fear" required minlength="35" maxlength="650" placeholder="Explique comment tu joues la peur et le danger."></textarea></label>
-          <label class="field"><span>Qu'est-ce que le Metagaming ? <b>*</b></span><textarea name="meta" required minlength="35" maxlength="650" placeholder="Ex. information obtenue hors RP et utilisée en jeu..."></textarea></label>
-          <label class="field"><span>Qu'est-ce que le PowerGaming ? <b>*</b></span><textarea name="power" required minlength="35" maxlength="650" placeholder="Explique avec tes propres mots."></textarea></label>
-        </section>
-
-        <section class="step" data-step="5">
-          <div class="section-head"><span>05</span><div><h2>Mises en situation</h2><p>La cohérence compte plus que la réponse parfaite.</p></div></div>
-          <label class="field"><span>Tu as un accident à haute vitesse. Que fais-tu ? <b>*</b></span><textarea name="crash" required minlength="60" maxlength="900" placeholder="Décris ta réaction RP."></textarea></label>
-          <label class="field"><span>Tu penses qu'un joueur vient de casser une règle pendant une scène. Que fais-tu ? <b>*</b></span><textarea name="rulebreak" required minlength="60" maxlength="900" placeholder="Explique comment tu gères la scène puis le problème."></textarea></label>
-          <label class="field"><span>Tu es braqué par deux personnes armées et tu es seul. Comment réagis-tu ? <b>*</b></span><textarea name="armedRobbery" required minlength="60" maxlength="900" placeholder="Explique ta réaction en prenant en compte le Fear RP et la cohérence de la scène."></textarea></label>
-          <label class="field"><span>Après une scène où ton personnage perd beaucoup (argent, véhicule, conflit), comment continues-tu ton RP ? <b>*</b></span><textarea name="rpLoss" required minlength="60" maxlength="900" placeholder="Explique comment tu gères la défaite sans casser la scène ni chercher à te venger HRP."></textarea></label>
-        </section>
-
-        <section class="step" data-step="6">
-          <div class="section-head"><span>06</span><div><h2>Entretien vocal final</h2><p>Un court vocal est obligatoire pour finaliser ta WhiteList.</p></div></div>
+          <div class="section-head"><span>04</span><div><h2>Envoi de la candidature</h2><p>Aucun horaire obligatoire. Tu peux proposer un créneau seulement si tu le souhaites.</p></div></div>
 
           <div class="interview-note">
-            <strong>🎙️ Dernière étape</strong>
-            <p>Après l'étude de ta candidature écrite, un petit entretien vocal sera effectué avec le staff. Propose 1 ou 2 créneaux où tu es réellement disponible. Le staff validera ensuite l'un des créneaux.</p>
+            <strong>🎙️ Entretien vocal</strong>
+            <p>Les créneaux sont facultatifs. Si tu ne mets rien, le staff pourra simplement te recontacter dans ton salon privé.</p>
           </div>
 
           <div class="grid two">
-            <label class="field"><span>Créneau 1 souhaité <b>*</b></span><input name="interviewSlot1" type="datetime-local" required /></label>
-            <label class="field"><span>Créneau 2 souhaité</span><input name="interviewSlot2" type="datetime-local" /></label>
+            <label class="field"><span>Créneau possible 1</span><input name="interviewSlot1" type="datetime-local" /></label>
+            <label class="field"><span>Créneau possible 2</span><input name="interviewSlot2" type="datetime-local" /></label>
           </div>
 
-          <label class="field"><span>Informations utiles pour l'entretien</span><textarea name="interviewNote" maxlength="600" placeholder="Ex. indisponible après 22h, besoin d'être prévenu quelques minutes avant..."></textarea><small><i data-counter="interviewNote">0</i>/600</small></label>
+          <label class="field"><span>Note pour le staff</span><textarea name="interviewNote" maxlength="600" placeholder="Facultatif"></textarea></label>
 
-          <label class="consent"><input type="checkbox" name="rulesAccepted" required><span>Je confirme avoir répondu personnellement, je suis disponible pour un court entretien vocal et j'accepte de respecter le règlement CaliSide WL.</span></label>
+          <label class="consent"><input type="checkbox" name="rulesAccepted"><span>Je confirme avoir répondu moi-même et avoir pris connaissance du règlement CaliSide.</span></label>
         </section>
 
         <div id="formError" class="form-error" aria-live="polite"></div>
@@ -187,7 +160,7 @@
       </form>
     </section>
 
-    <footer>© 2026 CaliSide WL — Candidature WhiteList • Serious RP • v2.2</footer>
+    <footer>© 2026 CaliSide WL — Candidature WhiteList • Serious RP • v5.0 simplifiée</footer>
   </main>
 
   <div class="modal" id="successModal" aria-hidden="true">

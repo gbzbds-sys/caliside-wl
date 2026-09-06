@@ -222,19 +222,15 @@ export default async function handler(req, res) {
         character: 'Personnage de test avec projet RP civil durable et cohérent.',
         rpType: ['Civil', 'Entreprise'], goals: 'Tester le workflow complet de candidature.',
         whyCaliSide: 'Test technique CaliSide WL.', contribution: 'Test du workflow Discord et staff.',
-        weeklyTime: '20 à 30 h', availability: ['Soir', 'Week-end'], constraints: 'Aucune.',
-        freekill: 'Tuer sans raison RP valable.', nopain: 'Ignorer la douleur RP.', fear: 'Jouer la peur face au danger.',
-        meta: 'Utiliser en RP une information obtenue HRP.', power: 'Forcer une action irréaliste.',
-        crash: 'Je joue les conséquences de l’accident.', rulebreak: 'Je termine la scène puis contacte le staff.',
-        armedRobbery: 'Je respecte le Fear RP.', rpLoss: 'J’accepte les conséquences RP.',
+        fear: 'Jouer la peur de manière crédible face au danger.',
+        meta: 'Ne pas utiliser en RP une information obtenue HRP.',
+        armedRobbery: 'Je respecte la peur et je coopère tant que ma vie est menacée.',
         interviewSlot1: futureIso(24), interviewSlot2: futureIso(48),
         interviewNote: 'TEST AUTOMATIQUE CaliSide WL', rulesAccepted: 'true'
       };
     }
 
     if (!b.whyCaliSide && b.whyPurple) b.whyCaliSide = b.whyPurple;
-    if (!b.interviewSlot1) b.interviewSlot1 = futureIso(24);
-    if (!b.interviewSlot2) b.interviewSlot2 = futureIso(48);
 
     const did = getDiscordId(b.discord);
     const pseudo = text(b.pseudo || 'Non renseigné', 40);
@@ -255,10 +251,14 @@ export default async function handler(req, res) {
       fields: [
         { name: '📌 Statut WL', value: '🟡 **Candidature reçue — en attente d’étude écrite**', inline: false },
         { name: '👤 Candidat', value: `**Pseudo :** ${pseudo}\n**Âge :** ${text(b.age || 'Non renseigné', 30)}\n**Discord :** ${text(b.discord || 'Non renseigné', 80)}${did ? `\n**Mention :** <@${did}>` : ''}\n**FiveM :** ${text(b.fivem || 'Non renseigné', 100)}`, inline: false },
-        { name: '🎮 Expérience', value: `**Temps RP :** ${text(b.experience || 'Non renseigné', 150)}\n${text(b.previousRp || 'Non renseigné', 700)}`, inline: false },
+        { name: '🎮 Expérience RP', value: text(b.experience || 'Non renseignée', 250), inline: false },
         { name: '🎭 Projet RP', value: text(b.character || 'Non renseigné', 900), inline: false },
         { name: '🧭 RP recherché', value: arrayText(b.rpType || 'Non renseigné', 500), inline: false },
-        { name: '🎙️ Entretien', value: `**Créneau 1 :** ${formatSlot(b.interviewSlot1)}\n**Créneau 2 :** ${formatSlot(b.interviewSlot2)}\n**Note :** ${text(b.interviewNote || 'Aucune', 400)}`, inline: false },
+        { name: '💜 Pourquoi CaliSide ?', value: text(b.whyCaliSide || 'Non renseigné', 700), inline: false },
+        { name: '📚 Question RP 1 — Fear RP', value: text(b.fear || 'Non renseigné', 700), inline: false },
+        { name: '📚 Question RP 2 — Metagaming', value: text(b.meta || 'Non renseigné', 700), inline: false },
+        { name: '🎬 Mise en situation — Braquage', value: text(b.armedRobbery || 'Non renseigné', 900), inline: false },
+        { name: '🎙️ Entretien (facultatif)', value: `**Créneau 1 :** ${b.interviewSlot1 ? formatSlot(b.interviewSlot1) : 'Non proposé'}\n**Créneau 2 :** ${b.interviewSlot2 ? formatSlot(b.interviewSlot2) : 'Non proposé'}\n**Note :** ${text(b.interviewNote || 'Aucune', 400)}`, inline: false },
         { name: '🔒 Salon privé candidat', value: `<#${privateChannel.id}>\nVisible uniquement par le candidat et le staff autorisé.`, inline: false }
       ],
       footer: { text: 'CaliSide WL • Candidature reçue • API 3.9.0' },
