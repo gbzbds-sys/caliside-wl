@@ -52,6 +52,31 @@ async function botApi(path, options = {}) {
   return { ok: r.ok, status: r.status, body, raw };
 }
 
+
+function staffRoleMentions() {
+  const raw = String(process.env.DISCORD_STAFF_ROLE_IDS || '').trim();
+  if (!raw) return '';
+
+  const ids = raw
+    .split(/[,\s;]+/)
+    .map((v) => String(v || '').trim())
+    .filter((v) => /^\d{17,20}$/.test(v));
+
+  return [...new Set(ids)].map((id) => `<@&${id}>`).join(' ');
+}
+
+function staffRoleIds() {
+  const raw = String(process.env.DISCORD_STAFF_ROLE_IDS || '').trim();
+  if (!raw) return [];
+
+  return [...new Set(
+    raw.split(/[,\s;]+/)
+      .map((v) => String(v || '').trim())
+      .filter((v) => /^\d{17,20}$/.test(v))
+  )];
+}
+
+
 function privateChannelName(pseudo, discordId) {
   const base = String(pseudo || 'candidat')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -65,54 +90,84 @@ async function createPrivateCandidateChannel({ discordId, pseudo }) {
   const botToken = String(process.env.DISCORD_BOT_TOKEN || '').trim();
   const guildId = String(process.env.DISCORD_GUILD_ID || DEFAULT_GUILD_ID).trim();
   const candidateChannelId = String(process.env.DISCORD_CANDIDATE_CHANNEL_ID || DEFAULT_CANDIDATE_CHANNEL_ID).trim();
+
   if (!botToken) throw new Error('DISCORD_BOT_TOKEN manquant : impossible de créer le salon privé de candidature.');
   if (!/^\d{17,20}$/.test(String(discordId || ''))) throw new Error('ID Discord candidat invalide : impossible de créer son salon privé.');
 
-  // Catégorie : variable dédiée si fournie, sinon même catégorie que le salon des candidatures staff.
+  const botMe = await botApi('/users/@me');
+  if (!botMe.ok) {
+    const msg = typeof botMe.body === 'object' && botMe.body ? botMe.body.message || JSON.stringify(botMe.body) : String(botMe.body || '');
+    throw new Error(`Impossible d'identifier le bot Discord configuré dans Vercel (Discord ${botMe.status}) : ${msg}`);
+  }
+
+  const botName = `${botMe.body?.username || 'Bot'}${botMe.body?.discriminator && botMe.body.discriminator !== '0' ? '#' + botMe.body.discriminator : ''}`;
+  const botId = String(botMe.body?.id || '');
+
   let parentId = String(process.env.DISCORD_WL_PRIVATE_CATEGORY_ID || '').trim();
   if (!parentId && /^\d{17,20}$/.test(candidateChannelId)) {
     const info = await botApi(`/channels/${candidateChannelId}`);
     if (info.ok && info.body?.parent_id) parentId = String(info.body.parent_id);
   }
 
-  const DEFAULT_STAFF_ROLE_IDS = [
-    '1528038923971068005', // Gérant Modérateur
-    '1429963172831432788', // Responsable Staff
-    '1474198609967710261', // Gérant Légal
-    '1429963172831432785', // Gérant Illégal
-    '1429963172831432786'  // Modérateur
-  ];
-  const envStaffRoles = String(process.env.DISCORD_STAFF_ROLE_IDS || '')
-    .split(',').map(v => v.trim()).filter(v => /^\d{17,20}$/.test(v));
-  const staffRoles = [...new Set([...DEFAULT_STAFF_ROLE_IDS, ...envStaffRoles])];
+  if (!/^\d{17,20}$/.test(parentId)) {
+    throw new Error(`DISCORD_WL_PRIVATE_CATEGORY_ID invalide ou absent. Bot utilisé : ${botName} (${botId}).`);
+  }
 
-  // VIEW_CHANNEL 1024 | SEND_MESSAGES 2048 | EMBED_LINKS 16384 | ATTACH_FILES 32768 | READ_MESSAGE_HISTORY 65536
-  const candidateAllow = String(1024 + 2048 + 16384 + 32768 + 65536);
-  // Staff : mêmes droits + MANAGE_MESSAGES 8192.
-  const staffAllow = String(1024 + 2048 + 8192 + 16384 + 32768 + 65536);
-  const overwrites = [
-    { id: guildId, type: 0, allow: '0', deny: '1024' },
-    { id: String(discordId), type: 1, allow: candidateAllow, deny: '0' },
-    ...staffRoles.map(id => ({ id, type: 0, allow: staffAllow, deny: '0' }))
-  ];
+  const category = await botApi(`/channels/${parentId}`);
+  if (!category.ok) {
+    const msg = typeof category.body === 'object' && category.body ? category.body.message || JSON.stringify(category.body) : String(category.body || '');
+    throw new Error(`Catégorie privée inaccessible pour ${botName} (${botId}) — Discord ${category.status} : ${msg}`);
+  }
+
+  if (String(category.body?.guild_id || '') !== guildId) {
+    throw new Error(`La catégorie ${parentId} n'appartient pas au serveur ${guildId}. Bot utilisé : ${botName} (${botId}).`);
+  }
 
   const payload = {
     name: privateChannelName(pseudo, discordId),
     type: 0,
     topic: `Candidature WL privée de ${pseudo} • Discord ${discordId} • visible uniquement par le candidat et le staff`,
-    permission_overwrites: overwrites
+    parent_id: parentId
   };
-  if (parentId) payload.parent_id = parentId;
 
   const created = await botApi(`/guilds/${guildId}/channels`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
   });
+
   if (!created.ok) {
     const msg = typeof created.body === 'object' && created.body ? created.body.message || JSON.stringify(created.body) : String(created.body || '');
-    if (created.status === 403) throw new Error(`Discord 403 : le bot doit avoir la permission Gérer les salons pour créer les candidatures privées. ${msg}`);
-    throw new Error(`Impossible de créer le salon privé WL (Discord ${created.status}) : ${msg}`);
+    if (created.status === 403) {
+      throw new Error(`Discord 403 lors de la création. Bot réellement utilisé : ${botName} (${botId}). Vérifie que CE bot a Voir les salons + Gérer les salons sur la catégorie ${parentId}. Détail Discord : ${msg}`);
+    }
+    throw new Error(`Impossible de créer le salon privé WL avec ${botName} (${botId}) — Discord ${created.status} : ${msg}`);
   }
-  return created.body;
+
+  const channelId = String(created.body?.id || '');
+  if (!channelId) throw new Error(`Discord n'a pas renvoyé l'ID du salon créé. Bot : ${botName} (${botId}).`);
+
+  const candidateAllow = String(1024 + 2048 + 16384 + 32768 + 65536);
+  const candidatePermission = await botApi(`/channels/${channelId}/permissions/${discordId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 1, allow: candidateAllow, deny: '0' })
+  });
+
+  if (!candidatePermission.ok) {
+    try { await botApi(`/channels/${channelId}`, { method: 'DELETE' }); } catch {}
+    const msg = typeof candidatePermission.body === 'object' && candidatePermission.body ? candidatePermission.body.message || JSON.stringify(candidatePermission.body) : String(candidatePermission.body || '');
+
+    if (candidatePermission.status === 403) {
+      throw new Error(`Salon créé mais impossible d'autoriser le candidat. Bot utilisé : ${botName} (${botId}). Mets Gérer les permissions en vert pour ce bot dans la catégorie ${parentId}. Détail : ${msg}`);
+    }
+    if (candidatePermission.status === 404) {
+      throw new Error(`Le candidat Discord ${discordId} n'est pas accessible dans le serveur. Vérifie qu'il a bien rejoint le Discord CaliSide avant d'envoyer sa candidature.`);
+    }
+    throw new Error(`Impossible d'ajouter le candidat au salon privé (Discord ${candidatePermission.status}) : ${msg}`);
+  }
+
+  return { ...created.body, _calisideBotName: botName, _calisideBotId: botId };
 }
 
 async function deleteChannelQuietly(channelId) {
@@ -146,6 +201,8 @@ async function postPrivateApplication(channelId, candidateId, embed, staffLink) 
   const sent = await botApi(`/channels/${channelId}/messages`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      content: staffRoleMentions() ? `${staffRoleMentions()} • Nouvelle candidature WL` : 'Nouvelle candidature WL',
+      allowed_mentions: { roles: staffRoleIds(), parse: [] },
       content: `<@${candidateId}> bienvenue dans ton espace de suivi WhiteList. 🔒\n\n🛡️ **Staff WL :** ${staffRoles.map(id => `<@&${id}>`).join(' ')}`,
       allowed_mentions: { users: [String(candidateId)], roles: staffRoles },
       embeds: [privacyEmbed]
